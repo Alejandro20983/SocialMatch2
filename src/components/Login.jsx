@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,26 +12,29 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      // Intentando iniciar sesión con el correo y contraseña
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    setLoading(false);
+      setLoading(false);
 
-    if (error) {
-      setError("Error en el inicio de sesión. Verifica tus credenciales.");
-      return;
+      // Si ocurre un error, se muestra el mensaje de error
+      if (error) {
+        console.log("Error de inicio de sesión:", error); // Loguea el error completo
+        setError("Error en el inicio de sesión. Verifica tus credenciales.");
+      } else {
+        // Si todo está bien, navega a la página de acceso
+        navigate("/acces-code");
+      }
+    } catch (err) {
+      setLoading(false);
+      console.log("Error inesperado:", err); // Loguea cualquier error inesperado
+      setError("Hubo un problema al intentar iniciar sesión.");
     }
-
-    if (!data.session) {
-      setError("Debes confirmar tu correo electrónico antes de iniciar sesión.");
-      return;
-    }
-
-    navigate("/acces-code");
   };
 
   return (
