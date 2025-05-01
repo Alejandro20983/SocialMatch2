@@ -12,6 +12,8 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setError("");
+    setMessage("");
 
     if (!email || !password || !confirmPassword) {
       setError("Todos los campos son obligatorios.");
@@ -23,34 +25,20 @@ const Register = () => {
       return;
     }
 
-    try {
-      const { error: insertError } = await supabase
-        .from("accounts")
-        .insert([{ email, password }]);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/profilecreation`,
+      },
+    });
 
-      if (insertError) {
-        setError(`Error al guardar los datos: ${insertError.message}`);
-        return;
-      }
-
-      const { error: authError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/profilecreation`,
-        },
-      });
-
-      if (authError) {
-        setError(`Error al enviar el enlace mágico: ${authError.message}`);
-        return;
-      }
-
-      setMessage("📧 Revisa tu correo para continuar con el registro.");
-      setError("");
-
-    } catch (err) {
-      setError(`Algo salió mal: ${err.message || err}`);
+    if (error) {
+      setError(`Error al registrarte: ${error.message}`);
+      return;
     }
+
+    setMessage("📧 Revisa tu correo para confirmar tu cuenta.");
   };
 
   return (

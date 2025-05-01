@@ -12,6 +12,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -22,9 +23,15 @@ const Login = () => {
 
     if (error) {
       setError("Error en el inicio de sesión. Verifica tus credenciales.");
-    } else {
-      navigate("/acces-code");
+      return;
     }
+
+    if (!data.session) {
+      setError("Debes confirmar tu correo electrónico antes de iniciar sesión.");
+      return;
+    }
+
+    navigate("/acces-code");
   };
 
   return (
